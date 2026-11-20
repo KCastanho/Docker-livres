@@ -23,6 +23,8 @@ services:
   mongo:
     image: mongo:8.0
     container_name: atelier-livres-mongo
+    ports:
+      - "27018:27017"
     volumes:
       - atelier-livres-data:/data/db
     healthcheck:
