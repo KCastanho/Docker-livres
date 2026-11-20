@@ -1,0 +1,45 @@
+name: atelier-livres
+
+services:
+  api:
+    image: atelier-livres-api:1.0.0
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    container_name: atelier-livres-node
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      MONGO_URI: mongodb://mongo:27017/livresdb
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - atelier-livres-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:8.0
+    container_name: atelier-livres-mongo
+    volumes:
+      - atelier-livres-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ping: 1}).ok' | grep -q '^1$'"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - atelier-livres-network
+    restart: unless-stopped
+
+volumes:
+  atelier-livres-data:
+    name: atelier-livres-data
+
+networks:
+  atelier-livres-network:
+    name: atelier-livres-network
+    driver: bridge
